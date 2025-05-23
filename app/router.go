@@ -28,12 +28,29 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 
 	cleanPath := path.Clean(request.URL.Path)
 
-	if cleanPath == "/" {
-		message := "NesaNest Rest API - 2025"
-		helper.WriteToResponseBody(writer, message)
-
+	if router.rootHandler(cleanPath, writer) {
 		return
 	}
+
+	if router.restoranHandler(cleanPath, writer, request) {
+		return
+	}
+
+	http.NotFound(writer, request)
+}
+
+func (router *Router) rootHandler(cleanPath string, writer http.ResponseWriter) bool {
+	if cleanPath == "/" {
+		message := "NesaNest RESTful API - 2025"
+		helper.WriteToResponseBody(writer, message)
+
+		return true
+	}
+
+	return false
+}
+
+func (router *Router) restoranHandler(cleanPath string, writer http.ResponseWriter, request *http.Request) bool {
 
 	if cleanPath == "/api/v1/restoran" {
 		switch request.Method {
@@ -45,15 +62,15 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 			writer.WriteHeader(http.StatusMethodNotAllowed)
 		}
 
-		return
+		return true
 	}
 
-	if strings.HasPrefix(cleanPath, "/api/v1/restoran") {
+	if strings.HasPrefix(cleanPath, "/api/v1/restoran/") {
 		id := strings.TrimPrefix(cleanPath, "/api/v1/restoran/")
 		if id == "" {
 			http.Error(writer, "missing restoran ID", http.StatusBadRequest)
 
-			return
+			return true
 		}
 
 		switch request.Method {
@@ -67,8 +84,8 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 			writer.WriteHeader(http.StatusMethodNotAllowed)
 		}
 
-		return
+		return true
 	}
 
-	http.NotFound(writer, request)
+	return false
 }
