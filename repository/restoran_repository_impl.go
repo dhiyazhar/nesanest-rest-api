@@ -17,9 +17,9 @@ func NewRestoranRepository() RestoranRepository {
 }
 
 func (repository *RestoranRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, restoran domain.Restoran) domain.Restoran {
-	SQL := "INSERT INTO restoran(name, description) VALUES ($1, $2) RETURNING id"
-	slog.Info("Added to database", restoran.Name, restoran.Description)
-	err := tx.QueryRowContext(ctx, SQL, restoran.Name, restoran.Description).Scan(&restoran.Id)
+	SQL := "INSERT INTO restoran(name, description, address, image_url) VALUES ($1, $2, $3, $4) RETURNING id"
+	slog.Info("Added to database", restoran.Name, restoran.Description, restoran.Address, restoran.ImageUrl)
+	err := tx.QueryRowContext(ctx, SQL, restoran.Name, restoran.Description, restoran.Address, restoran.ImageUrl).Scan(&restoran.Id)
 	helper.PanicIfError(err)
 
 	return restoran

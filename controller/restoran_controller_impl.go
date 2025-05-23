@@ -20,9 +20,23 @@ func NewRestoranController(restoranService service.RestoranService) RestoranCont
 }
 
 func (controller *RestoranControllerImpl) Create(writer http.ResponseWriter, request *http.Request) {
-	restoranCreateRequest := web.RestoranCreateRequest{}
-	helper.ReadFromRequestBody(request, &restoranCreateRequest)
-	slog.Info("New HTTP request", slog.Any("HTTP", request))
+	err := request.ParseMultipartForm(10 << 20)
+	helper.PanicIfError(err)
+
+	restoranCreateRequest := web.RestoranCreateRequest{
+		Name:        request.FormValue("name"),
+		Description: request.FormValue("description"),
+		Address:     request.FormValue("address"),
+	}
+
+	uploadDir := "./uploads/restoran_images"
+	filePath, err := helper.SaveUploadedFile(request, "image", uploadDir)
+	if err != nil {
+		slog.Error("failed to save uploaded file", "error", err)
+		helper.PanicIfError(err)
+	}
+	restoranCreateRequest.ImageUrl = filePath
+
 	slog.Info("Created new RestoranRequest", restoranCreateRequest.Name, restoranCreateRequest.Description)
 
 	restoranResponse := controller.RestoranService.Create(request.Context(), restoranCreateRequest)

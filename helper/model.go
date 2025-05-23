@@ -10,6 +10,8 @@ func ToRestoranResponse(restoran domain.Restoran) web.RestoranResponse {
 		Id:          restoran.Id,
 		Name:        restoran.Name,
 		Description: restoran.Description,
+		Address:     restoran.Address,
+		ImageUrl:    restoran.ImageUrl,
 	}
 }
 

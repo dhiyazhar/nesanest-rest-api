@@ -38,6 +38,8 @@ func (service *RestoranServiceImpl) Create(ctx context.Context, request web.Rest
 	restoran := domain.Restoran{
 		Name:        request.Name,
 		Description: request.Description,
+		Address:     request.Address,
+		ImageUrl:    request.ImageUrl,
 	}
 
 	restoran = service.RestoranRepository.Save(ctx, tx, restoran)
