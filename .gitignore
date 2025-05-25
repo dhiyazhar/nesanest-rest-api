@@ -1,2 +1,9 @@
+# .env file
+.env
+
+# dev test upload folder
 uploads/
+
+# bin
 nesanest-api
+
