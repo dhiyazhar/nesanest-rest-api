@@ -45,6 +45,11 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
     }
 
     http.NotFound(writer, request)
+	if router.staticFileServer(cleanPath, writer, request) {
+		return
+	}
+
+	http.NotFound(writer, request)
 }
 
 func (router *Router) rootHandler(cleanPath string, writer http.ResponseWriter) bool {
@@ -173,4 +178,15 @@ func (router *Router) userHandler(cleanPath string, writer http.ResponseWriter, 
     }
 
     return false
+}
+
+func (router *Router) staticFileServer(cleanPath string, writer http.ResponseWriter, request *http.Request) bool {
+	if strings.HasPrefix(cleanPath, "/static/") {
+		fs := http.Dir("static")
+		http.StripPrefix("/static/", http.FileServer(fs)).ServeHTTP(writer, request)
+
+		return true
+	}
+
+	return false
 }

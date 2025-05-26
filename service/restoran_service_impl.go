@@ -9,6 +9,7 @@ import (
 	"nesanest-rest-api/model/domain"
 	"nesanest-rest-api/model/web"
 	"nesanest-rest-api/repository"
+	"os"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -79,6 +80,17 @@ func (service *RestoranServiceImpl) Delete(ctx context.Context, categoryId int) 
 	restoran, err := service.RestoranRepository.FindById(ctx, tx, categoryId)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	slog.Info("Restoran ImageUrl retrieved:", "url", restoran.ImageUrl)
+
+	if restoran.ImageUrl != "" {
+		err := os.Remove(restoran.ImageUrl)
+		slog.Info("image", restoran.ImageUrl, "deleted")
+		if err != nil {
+			slog.Error("Failed to delete image file", "error", err, "path", restoran.ImageUrl)
+			helper.PanicIfError(err)
+		}
 	}
 
 	service.RestoranRepository.Delete(ctx, tx, restoran)

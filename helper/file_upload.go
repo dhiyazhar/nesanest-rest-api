@@ -14,11 +14,6 @@ func CurrentUnixNano() int64 {
 }
 
 func SaveUploadedFile(request *http.Request, fieldName string, uploadDir string) (string, error) {
-	err := request.ParseMultipartForm(10 << 20)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse multipart form: %w", err)
-	}
-
 	file, handler, err := request.FormFile(fieldName)
 	if err != nil {
 		return "", fmt.Errorf("failed to get file from form field '%s': %w", fieldName, err)
