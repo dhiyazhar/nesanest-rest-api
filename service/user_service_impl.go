@@ -127,3 +127,20 @@ func (service *UserServiceImpl) Delete(ctx context.Context, userId int) {
 
 	service.UserRepository.Delete(ctx, tx, user)
 }
+
+func (service *UserServiceImpl) ForgotPassword(ctx context.Context, request web.UserForgotPasswordRequest) {
+    tx, err := service.DB.Begin()
+    helper.PanicIfError(err)
+    defer helper.CommitOrRollback(tx)
+
+    user, err := service.UserRepository.FindByEmail(ctx, tx, request.Email)
+    if err != nil {
+        panic(errors.New("email tidak ditemukan"))
+    }
+
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
+    helper.PanicIfError(err)
+
+    user.Password = string(hashedPassword)
+    service.UserRepository.UpdatePassword(ctx, tx, user)
+}
