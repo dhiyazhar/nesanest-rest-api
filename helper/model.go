@@ -24,3 +24,23 @@ func ToRestoranResponses(restorans []domain.Restoran) []web.RestoranResponse {
 
 	return restoranResponses
 }
+
+
+func ToUserResponse(user domain.User) web.UserResponse {
+	return web.UserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		Email:    user.Email,
+		ProfileImg: user.ProfileImg,
+	}
+}
+
+func ToUserResponses(users []domain.User) []web.UserResponse {
+	var userResponses []web.UserResponse
+
+	for _, user := range users {
+		userResponses = append(userResponses, ToUserResponse(user))
+	}
+
+	return userResponses
+}

@@ -17,12 +17,17 @@ import (
 func main() {
 	db := app.NewDB()
 	validate := validator.New()
+
 	restoranRepository := repository.NewRestoranRepository()
 	restoranService := service.NewRestoranService(restoranRepository, db, validate)
 	restoranController := controller.NewRestoranController(restoranService)
 
-	router := app.NewRouter(restoranController)
+	userRepository := repository.NewUserRepository()
+	userService := service.NewUserService(userRepository, db)
+	userController := controller.NewUserController(userService)
 
+	router := app.NewRouter(restoranController, userController)
+	
 	server := http.Server{
 		Addr:    "localhost:3000",
 		Handler: middleware.NewAuthMiddleware(router),

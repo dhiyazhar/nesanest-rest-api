@@ -13,8 +13,8 @@ import (
 func NewDB() *sql.DB {
 	host := "localhost"
 	port := 5432
-	user := "azhar"
-	password := "azhar"
+	user := "postgres"
+	password := "abriel(14)"
 	dbname := "nesanest"
 
 	dsn := fmt.Sprintf(
