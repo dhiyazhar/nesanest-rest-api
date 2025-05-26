@@ -40,14 +40,14 @@ func (repository *RestoranRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx
 }
 
 func (repository *RestoranRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, restoranId int) (domain.Restoran, error) {
-	SQL := "SELECT id FROM restoran WHERE id = $1"
+	SQL := "SELECT id, name, description, address, image_url FROM restoran WHERE id = $1"
 	rows, err := tx.QueryContext(ctx, SQL, restoranId)
 	helper.PanicIfError(err)
 	defer rows.Close()
 
 	restoran := domain.Restoran{}
 	if rows.Next() {
-		err := rows.Scan(&restoran.Id)
+		err := rows.Scan(&restoran.Id, &restoran.Name, &restoran.Description, &restoran.Address, &restoran.ImageUrl)
 		helper.PanicIfError(err)
 		return restoran, nil
 	} else {
@@ -56,7 +56,7 @@ func (repository *RestoranRepositoryImpl) FindById(ctx context.Context, tx *sql.
 }
 
 func (repository *RestoranRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Restoran {
-	SQL := "SELECT id, name, description FROM restoran ORDER BY id ASC"
+	SQL := "SELECT id, name, description, address, image_url FROM restoran ORDER BY id ASC"
 	rows, err := tx.QueryContext(ctx, SQL)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -64,7 +64,7 @@ func (repository *RestoranRepositoryImpl) FindAll(ctx context.Context, tx *sql.T
 	var restorans []domain.Restoran
 	for rows.Next() {
 		restoran := domain.Restoran{}
-		err := rows.Scan(&restoran.Id, &restoran.Name, &restoran.Description)
+		err := rows.Scan(&restoran.Id, &restoran.Name, &restoran.Description, &restoran.Address, &restoran.ImageUrl)
 		helper.PanicIfError(err)
 		restorans = append(restorans, restoran)
 	}

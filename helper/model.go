@@ -6,12 +6,17 @@ import (
 )
 
 func ToRestoranResponse(restoran domain.Restoran) web.RestoranResponse {
+	imageUrl := restoran.ImageUrl
+	if imageUrl != "" {
+		imageUrl = AppConfig.AppBaseUrl + "/" + imageUrl
+	}
+
 	return web.RestoranResponse{
 		Id:          restoran.Id,
 		Name:        restoran.Name,
 		Description: restoran.Description,
 		Address:     restoran.Address,
-		ImageUrl:    restoran.ImageUrl,
+		ImageUrl:    imageUrl,
 	}
 }
 

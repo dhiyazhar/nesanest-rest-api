@@ -5,17 +5,21 @@ import (
 	"fmt"
 	"log/slog"
 	"nesanest-rest-api/helper"
+	"strconv"
 	"time"
 
 	_ "github.com/lib/pq"
 )
 
 func NewDB() *sql.DB {
-	host := "localhost"
-	port := 5432
-	user := "azhar"
-	password := "azhar"
-	dbname := "nesanest"
+	host := helper.AppConfig.DB.GetHost()
+	portStr := helper.AppConfig.DB.GetPort()
+	user := helper.AppConfig.DB.GetUsername()
+	password := helper.AppConfig.DB.GetPassword()
+	dbname := helper.AppConfig.DB.GetDBName()
+
+	port, err := strconv.Atoi(portStr)
+	helper.PanicIfError(err)
 
 	dsn := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",

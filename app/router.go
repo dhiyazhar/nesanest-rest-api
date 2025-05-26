@@ -36,6 +36,10 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
+	if router.staticFileServer(cleanPath, writer, request) {
+		return
+	}
+
 	http.NotFound(writer, request)
 }
 
@@ -83,6 +87,17 @@ func (router *Router) restoranHandler(cleanPath string, writer http.ResponseWrit
 		default:
 			writer.WriteHeader(http.StatusMethodNotAllowed)
 		}
+
+		return true
+	}
+
+	return false
+}
+
+func (router *Router) staticFileServer(cleanPath string, writer http.ResponseWriter, request *http.Request) bool {
+	if strings.HasPrefix(cleanPath, "/static/") {
+		fs := http.Dir("static")
+		http.StripPrefix("/static/", http.FileServer(fs)).ServeHTTP(writer, request)
 
 		return true
 	}

@@ -29,7 +29,7 @@ func (controller *RestoranControllerImpl) Create(writer http.ResponseWriter, req
 		Address:     request.FormValue("address"),
 	}
 
-	uploadDir := "./uploads/restoran_images"
+	uploadDir := "./static/restoran_images"
 	filePath, err := helper.SaveUploadedFile(request, "image", uploadDir)
 	if err != nil {
 		slog.Error("failed to save uploaded file", "error", err)
@@ -40,7 +40,6 @@ func (controller *RestoranControllerImpl) Create(writer http.ResponseWriter, req
 	slog.Info("Created new RestoranRequest", restoranCreateRequest.Name, restoranCreateRequest.Description)
 
 	restoranResponse := controller.RestoranService.Create(request.Context(), restoranCreateRequest)
-
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
