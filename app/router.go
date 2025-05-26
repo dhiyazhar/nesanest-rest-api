@@ -6,7 +6,7 @@ import (
     "nesanest-rest-api/helper"
     "nesanest-rest-api/middleware"
     "net/http"
-	"strconv"
+    "strconv"
     "path"
     "strings"
 )
@@ -97,32 +97,42 @@ func (router *Router) restoranHandler(cleanPath string, writer http.ResponseWrit
 }
 
 func (router *Router) userHandler(cleanPath string, writer http.ResponseWriter, request *http.Request) bool {
+    // Register user
     if cleanPath == "/api/v1/users/register" && request.Method == http.MethodPost {
         router.userController.Register(writer, request)
         return true
     }
 
+    // Login user
     if cleanPath == "/api/v1/users/login" && request.Method == http.MethodPost {
         router.userController.Login(writer, request)
         return true
     }
 
-if strings.HasPrefix(cleanPath, "/api/v1/users/profile/") {
-    id := strings.TrimPrefix(cleanPath, "/api/v1/users/profile/")
-    if id == "" {
-        http.Error(writer, "missing user ID", http.StatusBadRequest)
+    // Forgot password
+    if cleanPath == "/api/v1/users/forgot-password" && request.Method == http.MethodPost {
+        router.userController.ForgotPassword(writer, request)
         return true
     }
-    if request.Method == http.MethodPut {
-        middleware.JWTAuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-            router.userController.UpdateProfile(w, r)
-        })).ServeHTTP(writer, request)
-        return true
-    }
-    writer.WriteHeader(http.StatusMethodNotAllowed)
-    return true
-}
 
+    // Update profile user (JWT)
+    if strings.HasPrefix(cleanPath, "/api/v1/users/profile/") {
+        id := strings.TrimPrefix(cleanPath, "/api/v1/users/profile/")
+        if id == "" {
+            http.Error(writer, "missing user ID", http.StatusBadRequest)
+            return true
+        }
+        if request.Method == http.MethodPut {
+            middleware.JWTAuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+                router.userController.UpdateProfile(w, r)
+            })).ServeHTTP(writer, request)
+            return true
+        }
+        writer.WriteHeader(http.StatusMethodNotAllowed)
+        return true
+    }
+
+    // Update password user (JWT)
     if strings.HasPrefix(cleanPath, "/api/v1/users/password/") {
         id := strings.TrimPrefix(cleanPath, "/api/v1/users/password/")
         if id == "" {
@@ -139,27 +149,28 @@ if strings.HasPrefix(cleanPath, "/api/v1/users/profile/") {
         return true
     }
 
-	if strings.HasPrefix(cleanPath, "/api/	v1/users/") {
-	    if request.Method == http.	MethodDelete {
-	        middleware.JWTAuthMiddleware	(http.HandlerFunc(func(w http.	ResponseWriter, r *http.	Request) {
-	            authHeader := r.Header.Get	("Authorization")
-	            tokenString := ""
-	            if strings.HasPrefix	(authHeader, "Bearer ") {
-	                tokenString = strings.	TrimPrefix(authHeader, 	"Bearer ")
-	            }
-	            claims, err := helper.	ParseJWT(tokenString)
-	            if err != nil {
-	                http.Error(w, 	"Unauthorized", http.	StatusUnauthorized)
-	                return
-	            }
-	            userId := int(claims	["user_id"].(float64))
-	            router.userController.	Delete(w, r, strconv.Itoa	(userId))
-	        })).ServeHTTP(writer, request)
-	        return true
-	    }
-	    writer.WriteHeader(http.	StatusMethodNotAllowed)
-	    return true
-	}
+    // Delete user (JWT, ID dari JWT)
+    if strings.HasPrefix(cleanPath, "/api/v1/users/") {
+        if request.Method == http.MethodDelete {
+            middleware.JWTAuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+                authHeader := r.Header.Get("Authorization")
+                tokenString := ""
+                if strings.HasPrefix(authHeader, "Bearer ") {
+                    tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+                }
+                claims, err := helper.ParseJWT(tokenString)
+                if err != nil {
+                    http.Error(w, "Unauthorized", http.StatusUnauthorized)
+                    return
+                }
+                userId := int(claims["user_id"].(float64))
+                router.userController.Delete(w, r, strconv.Itoa(userId))
+            })).ServeHTTP(writer, request)
+            return true
+        }
+        writer.WriteHeader(http.StatusMethodNotAllowed)
+        return true
+    }
 
     return false
 }
