@@ -1,4 +1,3 @@
-// filepath: [user_controller_impl.go](http://_vscodecontentref_/0)
 package controller
 
 import (
@@ -33,12 +32,11 @@ func (controller *UserControllerImpl) Login(w http.ResponseWriter, r *http.Reque
     response, token := controller.UserService.Login(r.Context(), request)
     helper.WriteToResponseBody(w, map[string]interface{}{
         "user":  response,
-        "token": token,
+        "token": token,	
     })
 }
 
 func (controller *UserControllerImpl) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-    // Ambil JWT dari header Authorization
     authHeader := r.Header.Get("Authorization")
     tokenString := ""
     if strings.HasPrefix(authHeader, "Bearer ") {
@@ -53,7 +51,7 @@ func (controller *UserControllerImpl) UpdateProfile(w http.ResponseWriter, r *ht
 
     var request web.UserUpdateUsernameRequest
     helper.ReadFromRequestBody(r, &request)
-    request.Id = userId // Pakai ID dari JWT, bukan dari body
+    request.Id = userId
 
     response := controller.UserService.UpdateProfile(r.Context(), request)
     helper.WriteToResponseBody(w, response)
@@ -71,4 +69,11 @@ func (controller *UserControllerImpl) Delete(w http.ResponseWriter, r *http.Requ
     helper.PanicIfError(err)
     controller.UserService.Delete(r.Context(), userId)
     helper.WriteToResponseBody(w, map[string]string{"message": "User berhasil dihapus"})
+}
+
+func (controller *UserControllerImpl) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+    var request web.UserForgotPasswordRequest
+    helper.ReadFromRequestBody(r, &request)
+    controller.UserService.ForgotPassword(r.Context(), request)
+    helper.WriteToResponseBody(w, map[string]string{"message": "Password berhasil direset"})
 }
