@@ -11,4 +11,6 @@ type UserController interface {
 	UpdatePassword(writer http.ResponseWriter, request *http.Request)
 	Delete(writer http.ResponseWriter, request *http.Request, id string)
 	ForgotPassword(w http.ResponseWriter, r *http.Request)
+	    FindById(writer http.ResponseWriter, request *http.Request, id string)
+    FindAll(writer http.ResponseWriter, request *http.Request)
 }

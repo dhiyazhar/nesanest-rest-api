@@ -103,16 +103,25 @@ func (service *UserServiceImpl) UpdatePassword(ctx context.Context, request web.
 }
 
 func (service *UserServiceImpl) FindById(ctx context.Context, userId int) web.UserResponse {
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
-	defer helper.CommitOrRollback(tx)
+    tx, err := service.DB.Begin()
+    helper.PanicIfError(err)
+    defer helper.CommitOrRollback(tx)
 
-	user, err := service.UserRepository.FindById(ctx, tx, userId)
-	if err != nil {
-		panic(exception.NewNotFoundError("User tidak ditemukan"))
-	}
+    user, err := service.UserRepository.FindById(ctx, tx, userId)
+    if err != nil {
+        panic(exception.NewNotFoundError("user tidak ditemukan"))
+    }
+    return helper.ToUserResponse(user)
+}
 
-	return helper.ToUserResponse(user)
+func (service *UserServiceImpl) FindAll(ctx context.Context) []web.UserResponse {
+    tx, err := service.DB.Begin()
+    helper.PanicIfError(err)
+    defer helper.CommitOrRollback(tx)
+
+    users, err := service.UserRepository.FindAll(ctx, tx)
+    helper.PanicIfError(err)
+    return helper.ToUserResponses(users)
 }
 
 func (service *UserServiceImpl) Delete(ctx context.Context, userId int) {

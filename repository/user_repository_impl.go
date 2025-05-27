@@ -61,6 +61,22 @@ func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, 
     return user, errors.New("user tidak ditemukan")
 }
 
+func (repository *UserRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) ([]domain.User, error) {
+    SQL := "SELECT id, username, password, email, image_url FROM users"
+    rows, err := tx.QueryContext(ctx, SQL)
+    helper.PanicIfError(err)
+    defer rows.Close()
+
+    var users []domain.User
+    for rows.Next() {
+        user := domain.User{}
+        err := rows.Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.ProfileImg)
+        helper.PanicIfError(err)
+        users = append(users, user)
+    }
+    return users, nil
+}
+
 func (r *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *sql.Tx, email string) (domain.User, error) {
     SQL := "SELECT id, username, email, password FROM users WHERE email = $1"
     rows, err := tx.QueryContext(ctx, SQL, email)

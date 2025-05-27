@@ -11,6 +11,7 @@ type UserService interface {
 	UpdateProfile(ctx context.Context, request web.UserUpdateUsernameRequest) web.UserResponse
 	UpdatePassword(ctx context.Context, request web.UserUpdatePasswordRequest)
 	FindById(ctx context.Context, userId int) web.UserResponse
+    FindAll(ctx context.Context) []web.UserResponse
 	Delete(ctx context.Context, userId int)
 	ForgotPassword(ctx context.Context, request web.UserForgotPasswordRequest)
 }
