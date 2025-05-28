@@ -114,16 +114,6 @@ func (service *UserServiceImpl) FindById(ctx context.Context, userId int) web.Us
     return helper.ToUserResponse(user)
 }
 
-func (service *UserServiceImpl) FindAll(ctx context.Context) []web.UserResponse {
-    tx, err := service.DB.Begin()
-    helper.PanicIfError(err)
-    defer helper.CommitOrRollback(tx)
-
-    users, err := service.UserRepository.FindAll(ctx, tx)
-    helper.PanicIfError(err)
-    return helper.ToUserResponses(users)
-}
-
 func (service *UserServiceImpl) Delete(ctx context.Context, userId int) {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)

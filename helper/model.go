@@ -44,3 +44,23 @@ func ToUserResponses(users []domain.User) []web.UserResponse {
 
 	return userResponses
 }
+
+func ToReviewResponse(review domain.Review) web.ReviewResponse {
+    return web.ReviewResponse{
+        Id:         review.Id,
+        UserId:     review.UserId,
+        RestoranId: review.RestoranId,
+        Rating:     review.Rating,
+        Comment:    review.Comment,
+        ImageUrl:   review.ImageUrl,
+        CreatedAt:  review.CreatedAt,
+    }
+}
+
+func ToReviewResponses(reviews []domain.Review) []web.ReviewResponse {
+    var responses []web.ReviewResponse
+    for _, review := range reviews {
+        responses = append(responses, ToReviewResponse(review))
+    }
+    return responses
+}

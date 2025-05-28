@@ -84,8 +84,3 @@ func (controller *UserControllerImpl) FindById(w http.ResponseWriter, r *http.Re
     response := controller.UserService.FindById(r.Context(), userId)
     helper.WriteToResponseBody(w, response)
 }
-
-func (controller *UserControllerImpl) FindAll(w http.ResponseWriter, r *http.Request) {
-    response := controller.UserService.FindAll(r.Context())
-    helper.WriteToResponseBody(w, response)
-}
