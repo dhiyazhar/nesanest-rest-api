@@ -6,7 +6,6 @@ import (
 	"nesanest-rest-api/model/web"
 	"nesanest-rest-api/service"
 	"net/http"
-	"strconv"
 )
 
 type RestoranControllerImpl struct {
@@ -32,21 +31,21 @@ func (controller *RestoranControllerImpl) Create(writer http.ResponseWriter, req
 	uploadDir := "./static/restoran_images"
 	filePath, err := helper.SaveUploadedFile(request, "image", uploadDir)
 	if err != nil {
-		slog.Error("failed to save uploaded file", "error", err)
 		if err == http.ErrMissingFile {
 			helper.PanicIfError(err)
+		} else {
+			slog.Error("failed to save uploaded file", "error", err)
 			return
 		}
-		helper.PanicIfError(err)
-		return
+	} else {
+		restoranCreateRequest.ImageUrl = filePath
 	}
-	restoranCreateRequest.ImageUrl = filePath
 
 	slog.Info("Created new RestoranRequest", restoranCreateRequest.Name, restoranCreateRequest.Description)
 
 	restoranResponse := controller.RestoranService.Create(request.Context(), restoranCreateRequest)
 	webResponse := web.WebResponse{
-		Code:   200,
+		Code:   http.StatusCreated,
 		Status: "OK",
 		Data:   restoranResponse,
 	}
@@ -55,20 +54,16 @@ func (controller *RestoranControllerImpl) Create(writer http.ResponseWriter, req
 }
 
 func (controller *RestoranControllerImpl) Update(writer http.ResponseWriter, request *http.Request) {
-	idFromCtx := request.Context().Value("id")
-	id := idFromCtx.(string)
+	id := request.Context().Value("restoran_id").(int)
 
 	restoranUpdateRequest := web.RestoranUpdateRequest{}
 	helper.ReadFromRequestBody(request, &restoranUpdateRequest)
 
-	idInt, err := strconv.Atoi(id)
-	helper.PanicIfError(err)
-
-	restoranUpdateRequest.Id = idInt
+	restoranUpdateRequest.Id = id
 
 	restoranResponse := controller.RestoranService.Update(request.Context(), restoranUpdateRequest)
 	webResponse := web.WebResponse{
-		Code:   200,
+		Code:   http.StatusOK,
 		Status: "OK",
 		Data:   restoranResponse,
 	}
@@ -77,14 +72,11 @@ func (controller *RestoranControllerImpl) Update(writer http.ResponseWriter, req
 }
 
 func (controller *RestoranControllerImpl) Delete(writer http.ResponseWriter, request *http.Request) {
-	idFromCtx := request.Context().Value("id")
-	id := idFromCtx.(string)
-	idInt, err := strconv.Atoi(id)
-	helper.PanicIfError(err)
+	id := request.Context().Value("restoran_id").(int)
 
-	controller.RestoranService.Delete(request.Context(), idInt)
+	controller.RestoranService.Delete(request.Context(), id)
 	webResponse := web.WebResponse{
-		Code:   200,
+		Code:   http.StatusOK,
 		Status: "OK",
 	}
 
@@ -92,14 +84,11 @@ func (controller *RestoranControllerImpl) Delete(writer http.ResponseWriter, req
 }
 
 func (controller *RestoranControllerImpl) FindById(writer http.ResponseWriter, request *http.Request) {
-	idFromCtx := request.Context().Value("id")
-	id := idFromCtx.(string)
-	idInt, err := strconv.Atoi(id)
-	helper.PanicIfError(err)
+	id := request.Context().Value("restoran_id").(int)
 
-	restoranResponse := controller.RestoranService.FindById(request.Context(), idInt)
+	restoranResponse := controller.RestoranService.FindById(request.Context(), id)
 	webResponse := web.WebResponse{
-		Code:   200,
+		Code:   http.StatusOK,
 		Status: "OK",
 		Data:   restoranResponse,
 	}
@@ -110,7 +99,7 @@ func (controller *RestoranControllerImpl) FindById(writer http.ResponseWriter, r
 func (controller *RestoranControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request) {
 	restoranResponses := controller.RestoranService.FindAll(request.Context())
 	webResponse := web.WebResponse{
-		Code:   200,
+		Code:   http.StatusOK,
 		Status: "OK",
 		Data:   restoranResponses,
 	}
