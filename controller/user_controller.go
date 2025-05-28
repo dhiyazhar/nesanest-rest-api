@@ -9,8 +9,8 @@ type UserController interface {
 	Login(writer http.ResponseWriter, request *http.Request)
 	UpdateProfile(writer http.ResponseWriter, request *http.Request)
 	UpdatePassword(writer http.ResponseWriter, request *http.Request)
-	Delete(writer http.ResponseWriter, request *http.Request, id string)
+	Delete(writer http.ResponseWriter, request *http.Request)
 	ForgotPassword(w http.ResponseWriter, r *http.Request)
-	    FindById(writer http.ResponseWriter, request *http.Request, id string)
-    FindAll(writer http.ResponseWriter, request *http.Request)
+	FindById(writer http.ResponseWriter, request *http.Request)
+	FindAll(writer http.ResponseWriter, request *http.Request)
 }
