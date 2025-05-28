@@ -33,7 +33,12 @@ func (controller *RestoranControllerImpl) Create(writer http.ResponseWriter, req
 	filePath, err := helper.SaveUploadedFile(request, "image", uploadDir)
 	if err != nil {
 		slog.Error("failed to save uploaded file", "error", err)
+		if err == http.ErrMissingFile {
+			helper.PanicIfError(err)
+			return
+		}
 		helper.PanicIfError(err)
+		return
 	}
 	restoranCreateRequest.ImageUrl = filePath
 
@@ -49,7 +54,10 @@ func (controller *RestoranControllerImpl) Create(writer http.ResponseWriter, req
 	helper.WriteToResponseBody(writer, webResponse)
 }
 
-func (controller *RestoranControllerImpl) Update(writer http.ResponseWriter, request *http.Request, id string) {
+func (controller *RestoranControllerImpl) Update(writer http.ResponseWriter, request *http.Request) {
+	idFromCtx := request.Context().Value("id")
+	id := idFromCtx.(string)
+
 	restoranUpdateRequest := web.RestoranUpdateRequest{}
 	helper.ReadFromRequestBody(request, &restoranUpdateRequest)
 
@@ -68,7 +76,9 @@ func (controller *RestoranControllerImpl) Update(writer http.ResponseWriter, req
 	helper.WriteToResponseBody(writer, webResponse)
 }
 
-func (controller *RestoranControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, id string) {
+func (controller *RestoranControllerImpl) Delete(writer http.ResponseWriter, request *http.Request) {
+	idFromCtx := request.Context().Value("id")
+	id := idFromCtx.(string)
 	idInt, err := strconv.Atoi(id)
 	helper.PanicIfError(err)
 
@@ -81,7 +91,9 @@ func (controller *RestoranControllerImpl) Delete(writer http.ResponseWriter, req
 	helper.WriteToResponseBody(writer, webResponse)
 }
 
-func (controller *RestoranControllerImpl) FindById(writer http.ResponseWriter, request *http.Request, id string) {
+func (controller *RestoranControllerImpl) FindById(writer http.ResponseWriter, request *http.Request) {
+	idFromCtx := request.Context().Value("id")
+	id := idFromCtx.(string)
 	idInt, err := strconv.Atoi(id)
 	helper.PanicIfError(err)
 
