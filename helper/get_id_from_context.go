@@ -5,9 +5,9 @@ import (
 	"net/http"
 )
 
-func GetRestoranIDFromCtx(request *http.Request) string {
-	idFromCtx := request.Context().Value("id")
-	restoran_id := idFromCtx.(string)
+func GetRestoranIDFromCtx(request *http.Request) int {
+	idFromCtx := request.Context().Value("restoran_id")
+	restoran_id := idFromCtx.(int)
 
 	return restoran_id
 }
