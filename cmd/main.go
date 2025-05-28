@@ -5,7 +5,6 @@ import (
 	"nesanest-rest-api/app"
 	"nesanest-rest-api/controller"
 	"nesanest-rest-api/helper"
-	"nesanest-rest-api/middleware"
 	"nesanest-rest-api/repository"
 	"nesanest-rest-api/service"
 	"net/http"
@@ -27,10 +26,10 @@ func main() {
 	userController := controller.NewUserController(userService)
 
 	router := app.NewRouter(restoranController, userController)
-	
+
 	server := http.Server{
 		Addr:    "localhost:3000",
-		Handler: middleware.NewAuthMiddleware(router),
+		Handler: router,
 	}
 
 	slog.Info("Starting server", "address", server.Addr)
