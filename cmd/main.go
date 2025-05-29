@@ -32,7 +32,12 @@ func main() {
     reviewService := service.NewReviewService(reviewRepository, db)
     reviewController := controller.NewReviewController(reviewService)
 
-    router := app.NewRouter(restoranController, userController, reviewController)
+    // Global Chat
+    globalChatRepository := repository.NewGlobalChatRepository()
+    globalChatService := service.NewGlobalChatService(globalChatRepository, db)
+    globalChatController := controller.NewGlobalChatController(globalChatService)
+
+    router := app.NewRouter(restoranController, userController, reviewController, globalChatController)
 
 	server := http.Server{
 		Addr:    "localhost:3000",
