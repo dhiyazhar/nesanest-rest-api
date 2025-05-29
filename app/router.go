@@ -23,7 +23,7 @@ type Router struct {
 	routes []Route
 }
 
-func NewRouter(restoranController controller.RestoranController, userController controller.UserController, reviewController controller.ReviewController) http.Handler {
+func NewRouter(restoranController controller.RestoranController, userController controller.UserController, reviewController controller.ReviewController, globalChatController controller.GlobalChatController) http.Handler {
 	r := &Router{routes: []Route{}}
 
 	// root
@@ -66,6 +66,10 @@ func NewRouter(restoranController controller.RestoranController, userController 
 
     // review - protected
     r.Handle("POST", "/api/v1/reviews", reviewController.CreateReview, true)
+
+	// global chat - protected
+	r.Handle("POST", "/api/v1/global-chat", globalChatController.SendMessage, true) // protected (hanya user login/JWT)
+	r.Handle("GET", "/api/v1/global-chat", globalChatController.GetMessages, true)   // protected (hanya user login/JWT)
 
 	return r
 }
