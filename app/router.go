@@ -23,7 +23,7 @@ type Router struct {
 	routes []Route
 }
 
-func NewRouter(restoranController controller.RestoranController, userController controller.UserController) http.Handler {
+func NewRouter(restoranController controller.RestoranController, userController controller.UserController, reviewController controller.ReviewController) http.Handler {
 	r := &Router{routes: []Route{}}
 
 	// root
@@ -57,12 +57,24 @@ func NewRouter(restoranController controller.RestoranController, userController 
 	r.Handle("PUT", "/api/v1/users/password", userController.UpdatePassword, true)
 	r.Handle("DELETE", "/api/v1/users/{id}", userController.Delete, true)
 
+    // review - public
+    r.Handle("GET", "/api/v1/reviews/restoran/{id}", func(w http.ResponseWriter, r *http.Request) {
+        restoranId := extractID(path.Clean(r.URL.Path), "/api/v1/reviews/restoran/{id}")
+        reviewController.GetReviewsByRestoran(w, r, restoranId)
+    }, false)
+    r.Handle("GET", "/api/v1/reviews/user", reviewController.GetReviewsByUser, true)
+
+    // review - protected
+    r.Handle("POST", "/api/v1/reviews", reviewController.CreateReview, true)
+
 	return r
 }
 
 func (r *Router) Handle(method, pattern string, h http.HandlerFunc, auth bool) {
 	r.routes = append(r.routes, Route{method, pattern, h, auth})
 }
+
+type contextKey string
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer func() {
@@ -81,12 +93,12 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				}
 			}
 			if idParams := extractID(cleanPath, route.Pattern); idParams != "" {
-				var contextKey string
+				var key contextKey
 				if strings.Contains(route.Pattern, "restoran") {
-					contextKey = "restoran_id"
+					key = contextKey("restoran_id")
 				}
 
-				ctx := context.WithValue(req.Context(), contextKey, idParams)
+				ctx := context.WithValue(req.Context(), key, idParams)
 				req = req.WithContext(ctx)
 			}
 			handler(w, req)
