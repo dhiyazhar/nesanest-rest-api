@@ -17,15 +17,27 @@ func main() {
 	db := app.NewDB()
 	validate := validator.New()
 
-	restoranRepository := repository.NewRestoranRepository()
-	restoranService := service.NewRestoranService(restoranRepository, db, validate)
-	restoranController := controller.NewRestoranController(restoranService)
+    // Restoran
+    restoranRepository := repository.NewRestoranRepository()
+    restoranService := service.NewRestoranService(restoranRepository, db, validate)
+    restoranController := controller.NewRestoranController(restoranService)
 
-	userRepository := repository.NewUserRepository()
-	userService := service.NewUserService(userRepository, db)
-	userController := controller.NewUserController(userService)
+    // User
+    userRepository := repository.NewUserRepository()
+    userService := service.NewUserService(userRepository, db)
+    userController := controller.NewUserController(userService)
 
-	router := app.NewRouter(restoranController, userController)
+    // Review
+    reviewRepository := repository.NewReviewRepository()
+    reviewService := service.NewReviewService(reviewRepository, db)
+    reviewController := controller.NewReviewController(reviewService)
+
+    // Global Chat
+    globalChatRepository := repository.NewGlobalChatRepository()
+    globalChatService := service.NewGlobalChatService(globalChatRepository, db)
+    globalChatController := controller.NewGlobalChatController(globalChatService)
+
+    router := app.NewRouter(restoranController, userController, reviewController, globalChatController)
 
 	server := http.Server{
 		Addr:    "localhost:3000",
