@@ -23,6 +23,7 @@ func NewReviewController(reviewService service.ReviewService) ReviewController {
     }
 }
 
+// Mendukung form-data (dengan upload gambar) dan JSON (tanpa gambar)
 func (c *ReviewControllerImpl) CreateReview(w http.ResponseWriter, r *http.Request) {
     authHeader := r.Header.Get("Authorization")
     tokenString := ""
@@ -36,21 +37,47 @@ func (c *ReviewControllerImpl) CreateReview(w http.ResponseWriter, r *http.Reque
     }
     userId := int(claims["user_id"].(float64))
 
-    restoranId, _ := strconv.Atoi(r.FormValue("restoran_id"))
-    rating, _ := strconv.Atoi(r.FormValue("rating"))
-    comment := r.FormValue("comment")
+    contentType := r.Header.Get("Content-Type")
+    var restoranId, rating int
+    var comment, imageUrl string
 
-    file, handler, err := r.FormFile("image")
-    var imageUrl string
-    if err == nil {
-        defer file.Close()
-        filename := fmt.Sprintf("uploads/review/%d_%s", time.Now().UnixNano(), handler.Filename)
-        f, err := os.Create(filename)
+    if strings.HasPrefix(contentType, "application/json") {
+        var req web.ReviewCreateRequest
+        helper.ReadFromRequestBody(r, &req)
+        restoranId = req.RestoranId
+        rating = req.Rating
+        comment = req.Comment
+        imageUrl = ""
+    } else {
+        // Ambil data dari form
+        restoranId, _ = strconv.Atoi(r.FormValue("restoran_id"))
+        rating, _ = strconv.Atoi(r.FormValue("rating"))
+        comment = r.FormValue("comment")
+
+        // Proses upload file jika ada
+        file, handler, err := r.FormFile("image")
         if err == nil {
-            defer f.Close()
-            io.Copy(f, file)
-            imageUrl = filename
+            defer file.Close()
+            filename := fmt.Sprintf("uploads/review/%d_%s", time.Now().UnixNano(), handler.Filename)
+            f, err := os.Create(filename)
+            if err == nil {
+                defer f.Close()
+                io.Copy(f, file)
+                imageUrl = filename
+            }
         }
+    }
+
+    // Validasi rating
+    if rating < 1 || rating > 5 {
+        http.Error(w, "Rating harus antara 1 sampai 5", http.StatusBadRequest)
+        return
+    }
+
+    // Validasi restoranId
+    if restoranId <= 0 {
+        http.Error(w, "Restoran ID tidak valid", http.StatusBadRequest)
+        return
     }
 
     request := web.ReviewCreateRequest{
