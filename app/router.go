@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"path"
 	"strings"
@@ -57,19 +58,19 @@ func NewRouter(restoranController controller.RestoranController, userController 
 	r.Handle("PUT", "/api/v1/users/password", userController.UpdatePassword, true)
 	r.Handle("DELETE", "/api/v1/users/{id}", userController.Delete, true)
 
-    // review - public
-    r.Handle("GET", "/api/v1/reviews/restoran/{id}", func(w http.ResponseWriter, r *http.Request) {
-        restoranId := extractID(path.Clean(r.URL.Path), "/api/v1/reviews/restoran/{id}")
-        reviewController.GetReviewsByRestoran(w, r, restoranId)
-    }, false)
-    r.Handle("GET", "/api/v1/reviews/user", reviewController.GetReviewsByUser, true)
+	// review - public
+	r.Handle("GET", "/api/v1/reviews/restoran/{id}", func(w http.ResponseWriter, r *http.Request) {
+		restoranId := extractID(path.Clean(r.URL.Path), "/api/v1/reviews/restoran/{id}")
+		reviewController.GetReviewsByRestoran(w, r, restoranId)
+	}, false)
+	r.Handle("GET", "/api/v1/reviews/user", reviewController.GetReviewsByUser, true)
 
-    // review - protected
-    r.Handle("POST", "/api/v1/reviews", reviewController.CreateReview, true)
+	// review - protected
+	r.Handle("POST", "/api/v1/reviews", reviewController.CreateReview, true)
 
 	// global chat - protected
 	r.Handle("POST", "/api/v1/global-chat", globalChatController.SendMessage, true) // protected (hanya user login/JWT)
-	r.Handle("GET", "/api/v1/global-chat", globalChatController.GetMessages, true)   // protected (hanya user login/JWT)
+	r.Handle("GET", "/api/v1/global-chat", globalChatController.GetMessages, true)  // protected (hanya user login/JWT)
 
 	return r
 }
@@ -77,8 +78,6 @@ func NewRouter(restoranController controller.RestoranController, userController 
 func (r *Router) Handle(method, pattern string, h http.HandlerFunc, auth bool) {
 	r.routes = append(r.routes, Route{method, pattern, h, auth})
 }
-
-type contextKey string
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer func() {
@@ -97,9 +96,12 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				}
 			}
 			if idParams := extractID(cleanPath, route.Pattern); idParams != "" {
-				var key contextKey
+				key := ""
 				if strings.Contains(route.Pattern, "restoran") {
-					key = contextKey("restoran_id")
+					key = "restoran_id"
+				} else {
+					fmt.Printf("DEBUG: Route pattern does not contain 'restoran'. Key remains empty or unhandled.\n")
+
 				}
 
 				ctx := context.WithValue(req.Context(), key, idParams)
